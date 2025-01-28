@@ -12,7 +12,7 @@ public class YouTubeVM
     public string URL { get; set; }
 
     [Required]
-    public MediaType MediaType { get; set; }
+    public Utility.MediaType MediaType { get; set; }
 
     public string? Title { get; set; }
     public IEnumerable<SelectListItem>? Options { get; set; }

@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
-
-namespace YouTubeDownloaderWebApp.Utility;
+﻿namespace YouTubeDownloaderWebApp.Utility;
 
 public class CleanUp
 {
     private readonly ILogger<CleanUp> _logger;
     private readonly IWebHostEnvironment _webHostEnvironment;
-    private const string TempDownloadsFolder = "tempDownloads";
 
     public CleanUp(ILogger<CleanUp> logger, IWebHostEnvironment webHostEnvironment)
     {
@@ -15,7 +12,7 @@ public class CleanUp
     }
     public void ClearTempDownloads()
     {
-        string path = Path.Combine(_webHostEnvironment.WebRootPath, TempDownloadsFolder);
+        string path = Path.Combine(_webHostEnvironment.WebRootPath, General.TempDownloadsFolder);
 
         if (Directory.Exists(path))
         {
@@ -33,6 +30,6 @@ public class CleanUp
                 }
             }
         }
-        _logger.LogInformation($"Clean up complete. {TempDownloadsFolder} directory was cleared");
+        _logger.LogInformation($"Clean up complete. {General.TempDownloadsFolder} directory was cleared");
     }
 }

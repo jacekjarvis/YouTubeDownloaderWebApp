@@ -13,7 +13,7 @@ namespace YouTubeDownloaderWebApp.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private IYoutubeDownloader _youtubeDownloader;
-        private const string TempDownloadsFolder = "tempDownloads";
+
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment, IYoutubeDownloader youtubeDownloader)
         {
@@ -53,9 +53,9 @@ namespace YouTubeDownloaderWebApp.Controllers
         {
             if (viewModel.FileName != null)
             {
-                var path = Path.Combine(_webHostEnvironment.WebRootPath, TempDownloadsFolder);
+                var path = Path.Combine(_webHostEnvironment.WebRootPath, Utility.General.TempDownloadsFolder);
                 path = Path.Combine(path, viewModel.FileName);
-                var title = SanitizeText(viewModel.Title) + "." + Path.GetExtension(viewModel.FileName);
+                var title = Utility.General.SanitizeText(viewModel.Title) + "." + Path.GetExtension(viewModel.FileName);
 
                 try
                 {
@@ -81,7 +81,7 @@ namespace YouTubeDownloaderWebApp.Controllers
                 var selectedValue = Request.Form["Options"];
                 if (!string.IsNullOrEmpty(selectedValue))
                 {
-                    var path = Path.Combine(_webHostEnvironment.WebRootPath, TempDownloadsFolder) ; 
+                    var path = Path.Combine(_webHostEnvironment.WebRootPath, General.TempDownloadsFolder) ; 
                     var fileName = Guid.NewGuid().ToString();
                     await _youtubeDownloader.DownloadMedia(int.Parse(selectedValue), path, fileName);
 
@@ -129,13 +129,6 @@ namespace YouTubeDownloaderWebApp.Controllers
                 _logger.LogError(ex, "Error occurred while processing the video - GetData");
             }
         }
-
-        private static string SanitizeText(string fileName)
-        {
-            return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
-        }
-
-
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
