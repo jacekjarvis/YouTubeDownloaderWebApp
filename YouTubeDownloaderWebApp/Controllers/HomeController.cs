@@ -20,10 +20,14 @@ namespace YouTubeDownloaderWebApp.Controllers
             _youtubeDownloader = youtubeDownloader;    
         }
 
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Index(YouTubeVM viewModel)
         {
-            if (viewModel.URL == null) return View();
-            
             GetData(viewModel);
 
             var action = Request.Form["action"];

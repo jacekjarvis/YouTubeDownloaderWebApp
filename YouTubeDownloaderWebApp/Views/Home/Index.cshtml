@@ -7,7 +7,7 @@
             <div class="form-floating py-2 col-12">
                 <input asp-for="URL" class="form-control border-0 shadow" />
                 <label asp-for="URL" class="ms-2"></label>
-                @* <span asp-validation-for="URL" class="text-danger"></span> *@
+                <span asp-validation-for="URL" class="text-danger"></span>
             </div>
 
             <div class="form-floating py-2 col-12">
@@ -16,7 +16,7 @@
                     <option value="audio">Audio</option>
                 </select>
                 <label asp-for="MediaType" class="ms-2"></label>
-                @* <span asp-validation-for="MediaType" class="text-danger"></span> *@
+
             </div>
 
             <div class="row pt-2">
@@ -31,7 +31,6 @@
                 <div class="form-floating py-2 col-12">
                     <input asp-for="Title" class="form-control border-0 shadow" readonly />
                     <label asp-for="Title" class="ms-2"></label>
-                    @* <span asp-validation-for="URL" class="text-danger"></span> *@
                 </div>
 
                 <div class="form-floating  col-12">
