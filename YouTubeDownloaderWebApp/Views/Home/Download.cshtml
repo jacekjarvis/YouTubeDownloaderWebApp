@@ -1,0 +1,25 @@
+﻿@model YouTubeVM
+
+<div class="text-center">
+    <h1 class="display-4">YouTube Downloader</h1>
+    <h2>@Model.Title</h2>
+
+    <form method="post" class="row">
+        <input asp-for="Title" hidden />
+        <input asp-for="URL" hidden />
+        <input asp-for="MediaType" hidden />
+        <input asp-for="Options" hidden />
+        <input asp-for="FileName" hidden />
+
+        <div class="row pt-2">
+            <div class="col-6 col-md-3">
+                <button type="submit"  class="btn btn-primary form-control">Click here to Save your File</button>
+            </div>
+        </div>
+    </form>
+
+
+    <p><a asp-controller="Home" asp-action="Index">Download another YouTube video?</a></p>
+</div>
+
+

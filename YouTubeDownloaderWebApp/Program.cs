@@ -5,8 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IYoutubeDownloader, YoutubeExplodeDownloader>();
+builder.Services.AddSingleton<CleanUp>();
 
 var app = builder.Build();
+CleanUp();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -28,3 +30,14 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+// Perform cleanup at application startup
+void CleanUp()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var cleanUp = scope.ServiceProvider.GetRequiredService<CleanUp>();
+        cleanUp.ClearTempDownloads();
+    }
+}

@@ -65,7 +65,7 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
     }
 
 
-    public async Task<byte[]> DownloadMedia(int option, string outputPath, string title)
+    public async Task DownloadMedia(int option, string outputPath, string title)
     {
         var streamInfo = _streams[option];
 
@@ -92,8 +92,6 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
             var ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utility","ffmpeg", "ffmpeg.exe");
             await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder($"{outputFilePath}.{fileType}").SetFFmpegPath(ffmpegPath).Build());
         }
-
-        return await File.ReadAllBytesAsync($"{outputFilePath}.{fileType}");
     }
 
 }

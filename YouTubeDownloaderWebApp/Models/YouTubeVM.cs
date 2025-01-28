@@ -16,5 +16,7 @@ public class YouTubeVM
 
     public string? Title { get; set; }
     public IEnumerable<SelectListItem>? Options { get; set; }
+
+    public string? FileName { get; set; }
 }
 

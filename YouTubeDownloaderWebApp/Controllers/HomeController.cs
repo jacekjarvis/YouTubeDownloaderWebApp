@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using YouTubeDownloaderWebApp.Models;
@@ -12,6 +13,7 @@ namespace YouTubeDownloaderWebApp.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private IYoutubeDownloader _youtubeDownloader;
+        private const string TempDownloadsFolder = "tempDownloads";
 
         public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment, IYoutubeDownloader youtubeDownloader)
         {
@@ -31,51 +33,83 @@ namespace YouTubeDownloaderWebApp.Controllers
             GetData(viewModel);
 
             var action = Request.Form["action"];
-            if (action == "Download") return await Download(viewModel);
+            if (action == "Download") return await DownloadMedia(viewModel);
 
             return View(viewModel);
         }
 
-        private async Task<IActionResult> Download(YouTubeVM viewModel)
+        public IActionResult Download()
+        {
+            if (TempData["YouTubeVM"] != null)
+            {
+                var viewModel = JsonSerializer.Deserialize<YouTubeVM>((string)TempData["YouTubeVM"]);
+                return View(viewModel);
+            }
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public IActionResult Download(YouTubeVM viewModel)
+        {
+            if (viewModel.FileName != null)
+            {
+                var path = Path.Combine(_webHostEnvironment.WebRootPath, TempDownloadsFolder);
+                path = Path.Combine(path, viewModel.FileName);
+                var title = SanitizeText(viewModel.Title) + "." + Path.GetExtension(viewModel.FileName);
+
+                try
+                {
+                    var fileBytes = System.IO.File.ReadAllBytes(path);
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+
+                    return File(fileBytes, "application/octet-stream", title);
+                }
+                catch (Exception ex)
+                {
+                    TempData["DataError"] = "Sorry, unable to process the request. Please check the YouTube link and try again.";
+                    _logger.LogError(ex, "Error occurred while processing the video - Download");
+                }   
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        private async Task<IActionResult> DownloadMedia(YouTubeVM viewModel)
         {
             try
             {
                 var selectedValue = Request.Form["Options"];
                 if (!string.IsNullOrEmpty(selectedValue))
                 {
-                    string path = Path.GetTempPath();
+                    var path = Path.Combine(_webHostEnvironment.WebRootPath, TempDownloadsFolder) ; 
                     var fileName = Guid.NewGuid().ToString();
-                    var fileBytes = await _youtubeDownloader.DownloadMedia(int.Parse(selectedValue), path, fileName);
+                    await _youtubeDownloader.DownloadMedia(int.Parse(selectedValue), path, fileName);
 
-                    var ext = ".mp4";
-                    if (viewModel.MediaType == Utility.MediaType.Audio) ext = ".mp3";
-
+                    var ext = (viewModel.MediaType == MediaType.Video) ? ".mp4" : ".mp3";
                     fileName += ext;
-                    path = Path.Combine(path, fileName);
-                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                    viewModel.FileName = fileName;
+                    TempData["YouTubeVM"] = JsonSerializer.Serialize(viewModel);
 
-                    var title = SanitizeText(viewModel.Title) + ext;
-
-                    return File(fileBytes, "application/octet-stream", title);
+                    return RedirectToAction("Download");
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.DataError = "Sorry, unable to process the request. Please check the YouTube link and try again.";
-                _logger.LogError(ex, "Error occurred while processing the video.");
+                TempData["DataError"] = "Sorry, unable to process the request. Please check the YouTube link and try again.";
+                _logger.LogError(ex, "Error occurred while processing the video - DownloadMedia");
             }
             return View(viewModel);
         }
 
         private void GetData(YouTubeVM viewModel)
         {
-            _youtubeDownloader.VideoUrl = @"https://www.youtube.com/watch?v=ILE1KZZ0UYI";//viewModel.URL;
+            _youtubeDownloader.VideoUrl = viewModel.URL; // @"https://www.youtube.com/watch?v=ILE1KZZ0UYI";
 
             try
             {
                 viewModel.Title = _youtubeDownloader.GetVideoTitle();
 
-                if (viewModel.MediaType == Utility.MediaType.Video)
+                if (viewModel.MediaType == MediaType.Video)
                 {
                     viewModel.Options =  _youtubeDownloader.GetVideoOptions().Select((option, index) => new SelectListItem
                     {
@@ -91,8 +125,8 @@ namespace YouTubeDownloaderWebApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.DataError = "Sorry, unable to process the request. Please check the YouTube link and try again.";
-                _logger.LogError(ex, "Error occurred while processing the video.");
+                TempData["DataError"]  = "Sorry, unable to process the request. Please check the YouTube link and try again.";
+                _logger.LogError(ex, "Error occurred while processing the video - GetData");
             }
         }
 
@@ -100,6 +134,8 @@ namespace YouTubeDownloaderWebApp.Controllers
         {
             return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
         }
+
+
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

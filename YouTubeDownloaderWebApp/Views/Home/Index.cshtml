@@ -2,7 +2,7 @@
 
 <div class="text-center">
     <h1 class="display-4">YouTube Downloader</h1>
-    <div class="card shadow border-0 my-4">
+    <div class="card shadow border-1 col-lg-8">
         <form method="post" class="row">
             <div class="form-floating py-2 col-12">
                 <input asp-for="URL" class="form-control border-0 shadow" />
@@ -55,9 +55,9 @@
             
         
     </form>
-        @if (ViewBag.DataError != null)
+        @if (TempData["DataError"] != null)
         {
-            <p>@ViewBag.DataError</p>
+            <p>@TempData["DataError"] </p>
         }
     </div>
 </div>
