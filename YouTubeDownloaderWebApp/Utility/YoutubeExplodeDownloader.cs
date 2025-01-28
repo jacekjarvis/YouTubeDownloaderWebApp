@@ -64,19 +64,13 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
         return result;
     }
 
-    public async Task DownloadMedia(int option, string outputPath)
+
+    public async Task<byte[]> DownloadMedia(int option, string outputPath, string title)
     {
         var streamInfo = _streams[option];
 
-        var title = _videoTitle;
-        if (string.IsNullOrEmpty(title))
-        {
-            title = GetVideoTitle();
-        }
-        title = SanitizeText(title);
-
         var fileType = $"{streamInfo.Container}";
-        var outputFilePath = Path.Combine(outputPath, $"{title}");
+        var outputFilePath =  Path.Combine(outputPath, title);
 
         if (streamInfo is AudioOnlyStreamInfo)
         {
@@ -90,23 +84,16 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
         }
         else
         {
-            var streamManifest = _youtube.Videos.Streams.GetManifestAsync(VideoUrl).Result;
+            var streamManifest = await _youtube.Videos.Streams.GetManifestAsync(VideoUrl);
             var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
             var streamInfos = new IStreamInfo[] { audioStreamInfo, streamInfo };
-            await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder($"{outputFilePath}.{fileType}").Build());
 
+            var ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utility","ffmpeg", "ffmpeg.exe");
+            await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder($"{outputFilePath}.{fileType}").SetFFmpegPath(ffmpegPath).Build());
         }
 
-        var datetime = DateTime.Now;
-        Console.WriteLine($"Download completed: {datetime}");
-        Console.WriteLine($"File saved as: {outputFilePath}.{fileType}");
+        return await File.ReadAllBytesAsync($"{outputFilePath}.{fileType}");
     }
 
-
-
-    private static string SanitizeText(string fileName)
-    {
-        return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
-    }
 }

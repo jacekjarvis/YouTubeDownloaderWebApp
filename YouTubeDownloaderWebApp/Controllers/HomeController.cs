@@ -1,28 +1,72 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using YouTubeDownloaderWebApp.Models;
 using YouTubeDownloaderWebApp.Utility;
+
 
 namespace YouTubeDownloaderWebApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private IYoutubeDownloader _youtubeDownloader;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment, IYoutubeDownloader youtubeDownloader)
         {
             _logger = logger;
-            _youtubeDownloader = new YoutubeExplodeDownloader();    
+            _webHostEnvironment = webHostEnvironment;
+            _youtubeDownloader = youtubeDownloader;    
         }
 
-        public IActionResult Index(YouTubeVM viewModel)
+        public async Task<IActionResult> Index(YouTubeVM viewModel)
         {
             if (viewModel.URL == null) return View();
+            
+            GetData(viewModel);
 
+            var action = Request.Form["action"];
+            if (action == "Download") return await Download(viewModel);
+
+            return View(viewModel);
+        }
+
+        private async Task<IActionResult> Download(YouTubeVM viewModel)
+        {
+            try
+            {
+                var selectedValue = Request.Form["Options"];
+                if (!string.IsNullOrEmpty(selectedValue))
+                {
+                    string path = Path.GetTempPath();
+                    var fileName = Guid.NewGuid().ToString();
+                    var fileBytes = await _youtubeDownloader.DownloadMedia(int.Parse(selectedValue), path, fileName);
+
+                    var ext = ".mp4";
+                    if (viewModel.MediaType == Utility.MediaType.Audio) ext = ".mp3";
+
+                    fileName += ext;
+                    path = Path.Combine(path, fileName);
+                    if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+
+                    var title = SanitizeText(viewModel.Title) + ext;
+
+                    return File(fileBytes, "application/octet-stream", title);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.DataError = "Sorry, unable to process the request. Please check the YouTube link and try again.";
+                _logger.LogError(ex, "Error occurred while processing the video.");
+            }
+            return View(viewModel);
+        }
+
+        private void GetData(YouTubeVM viewModel)
+        {
             _youtubeDownloader.VideoUrl = @"https://www.youtube.com/watch?v=ILE1KZZ0UYI";//viewModel.URL;
+
             try
             {
                 viewModel.Title = _youtubeDownloader.GetVideoTitle();
@@ -43,14 +87,14 @@ namespace YouTubeDownloaderWebApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.DataError = "Sorry. Unable to retrieve data. Try entering over a valid youtube link";
+                ViewBag.DataError = "Sorry, unable to process the request. Please check the YouTube link and try again.";
+                _logger.LogError(ex, "Error occurred while processing the video.");
             }
+        }
 
-            
-
-
-            return View(viewModel);
-
+        private static string SanitizeText(string fileName)
+        {
+            return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
         }
 
 

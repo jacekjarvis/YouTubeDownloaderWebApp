@@ -12,4 +12,10 @@
     <PackageReference Include="YoutubeExplode.Converter" Version="6.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Utility\ffmpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -4,7 +4,6 @@
     <h1 class="display-4">YouTube Downloader</h1>
     <div class="card shadow border-0 my-4">
         <form method="post" class="row">
-
             <div class="form-floating py-2 col-12">
                 <input asp-for="URL" class="form-control border-0 shadow" />
                 <label asp-for="URL" class="ms-2"></label>
@@ -22,7 +21,7 @@
 
             <div class="row pt-2">
                 <div class="col-6 col-md-3">
-                    <button type="submit" class="btn btn-primary form-control">Get Data</button>
+                    <button type="submit" name="action" value="GetData" class="btn btn-primary form-control">Get Data</button>
                 </div>
             </div>
 
@@ -30,13 +29,13 @@
             {
 
                 <div class="form-floating py-2 col-12">
-                    <input asp-for="Title" class="form-control border-0 shadow" disabled/>
+                    <input asp-for="Title" class="form-control border-0 shadow" readonly />
                     <label asp-for="Title" class="ms-2"></label>
                     @* <span asp-validation-for="URL" class="text-danger"></span> *@
                 </div>
 
                 <div class="form-floating  col-12">
-                    <select asp-for="Options" asp-items="@Model.Options" class="form-select border-0 shadow">
+                    <select asp-for="Options" class="form-select border-0 shadow">
                         <option value="@Model.Options.First().Value" selected>@Model.Options.First().Text</option>
                         @foreach (var option in Model.Options.Skip(1))
                         {
@@ -46,7 +45,15 @@
                 <label asp-for="Options" class="ms-2"></label>
                 <span asp-validation-for="Options" class="text-danger"></span>
                 </div>
+
+                <div class="row pt-2">
+                    <div class="col-6 col-md-3">
+                        <button type="submit" name="action" value="Download" class="btn btn-primary form-control">Download</button>
+                    </div>
+                </div>
             }
+
+            
         
     </form>
         @if (ViewBag.DataError != null)
