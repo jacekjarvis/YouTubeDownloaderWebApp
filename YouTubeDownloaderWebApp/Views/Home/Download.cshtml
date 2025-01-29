@@ -14,16 +14,41 @@
 
                 <div class="row pt-2 justify-content-center">
                     <div class="col-4">
-                        <button type="submit"  class="btn btn-primary form-control">Click here to Save your File</button>
+                        <button id="submitButton" type="submit" class="btn btn-primary form-control">Click here to Save your File</button>
+                    </div>
+                </div>
+
+                <div id="loadingMessage" class="mt-2 text-center text-primary" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="fs-6">Your download has started...</p>
+
+                    <div class="py-4">
+                        <p class="fs-5"><a asp-controller="Home" asp-action="Index">Download another video?</a></p>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="py-4">
-            <p class="fs-5"><a asp-controller="Home" asp-action="Index">Download another video?</a></p>
-        </div>
+        
     </div>
 </div>
 
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.querySelector("form"); // Selects the form
+        var submitButton = document.getElementById("submitButton");
+        var loadingMessage = document.getElementById("loadingMessage");
+
+        form.addEventListener("submit", function () {
+            // Disable button to prevent multiple clicks
+            submitButton.disabled = true;
+            submitButton.innerHTML = "Processing...";
+
+            // Show loading message
+            loadingMessage.style.display = "block";
+        });
+    });
+</script>

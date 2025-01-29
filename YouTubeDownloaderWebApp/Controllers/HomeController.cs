@@ -48,6 +48,7 @@ namespace YouTubeDownloaderWebApp.Controllers
 
             return RedirectToAction("Index");
         }
+
         [HttpPost]
         public IActionResult Download(YouTubeVM viewModel)
         {
