@@ -71,11 +71,12 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
 
         var fileType = $"{streamInfo.Container}";
         var outputFilePath =  Path.Combine(outputPath, title);
+        var ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utility", "ffmpeg");
 
         if (streamInfo is AudioOnlyStreamInfo)
         {
             await _youtube.Videos.Streams.DownloadAsync(streamInfo, $"{outputFilePath}.{fileType}");
-            var mp3Converter = new MP3Converter();
+            var mp3Converter = new MP3Converter(ffmpegPath);
             if (mp3Converter.Convert(outputFilePath, fileType))
             {
                 fileType = "mp3";
@@ -88,8 +89,7 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
             var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
             var streamInfos = new IStreamInfo[] { audioStreamInfo, streamInfo };
-
-            var ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utility","ffmpeg", "ffmpeg.exe");
+            ffmpegPath = Path.Combine(ffmpegPath, "ffmpeg.exe");
             await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder($"{outputFilePath}.{fileType}").SetFFmpegPath(ffmpegPath).Build());
         }
     }

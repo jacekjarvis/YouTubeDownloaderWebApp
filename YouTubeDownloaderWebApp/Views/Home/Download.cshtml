@@ -19,11 +19,6 @@
                 </div>
 
                 <div id="loadingMessage" class="mt-2 text-center text-primary" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="fs-6">Your download has started...</p>
-
                     <div class="py-4">
                         <p class="fs-5"><a asp-controller="Home" asp-action="Index">Download another video?</a></p>
                     </div>
@@ -45,7 +40,7 @@
         form.addEventListener("submit", function () {
             // Disable button to prevent multiple clicks
             submitButton.disabled = true;
-            submitButton.innerHTML = "Processing...";
+            submitButton.innerHTML = "Your download has started...";
 
             // Show loading message
             loadingMessage.style.display = "block";

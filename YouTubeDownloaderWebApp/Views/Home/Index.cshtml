@@ -55,8 +55,8 @@
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p>Please wait while your request is processed...</p>
-                    <p>This may take a few minutes for larger files...</p>
+                    <p>Please wait while your request is processed...<br /> This may take a few minutes for larger files...</p>
+                    
                 </div>
             }  
         </form> 
@@ -70,13 +70,14 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () 
+    {
         var form = document.querySelector("form"); // Selects the form
         var submitButton = document.getElementById("submitButton");
         var loadingMessage = document.getElementById("loadingMessage");
 
-        form.addEventListener("submit", function () {
-
+        submitButton.addEventListener("click", function (event) 
+        {
             //creating temp input with value="Download" for backend processing since we are doing this submission with javascript
             var hiddenActionInput = document.createElement("input");
             hiddenActionInput.type = "hidden";
@@ -90,6 +91,8 @@
 
             // Show loading message
             loadingMessage.style.display = "block";
+
+            form.submit();
         });
     });
 </script>
