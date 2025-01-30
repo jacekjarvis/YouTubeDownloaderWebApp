@@ -9,8 +9,8 @@ public class Mp3Converter : IMp3Converter
     }
     public void Convert(string source)
     {
-        var fileName = Path.GetFileNameWithoutExtension(source);
-        FFMpeg.ExtractAudio(source, $"{fileName}.mp3");
+        var target = Path.ChangeExtension(source, "mp3");
+        FFMpeg.ExtractAudio(source, target);
         File.Delete(source);
     }
 }

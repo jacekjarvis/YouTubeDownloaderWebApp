@@ -84,8 +84,8 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
         if (_streams == null || _streams.Count == 0) return;
 
         var streamInfo = _streams[option];
-        var fileExt = $".{streamInfo.Container}";
-        var outputFilePath =  Path.Combine(outputPath, title, fileExt);
+        var fileExt = streamInfo.Container.ToString();
+        var outputFilePath =  Path.Combine(outputPath, $"{title}.{fileExt}");
 
         if (streamInfo is AudioOnlyStreamInfo)
         {

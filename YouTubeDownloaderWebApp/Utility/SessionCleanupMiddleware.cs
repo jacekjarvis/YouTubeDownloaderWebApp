@@ -1,6 +1,5 @@
 ﻿namespace YouTubeDownloaderWebApp.Utility;
 
-
 public class SessionCleanupMiddleware
 {
     private readonly RequestDelegate _next;
@@ -42,37 +41,3 @@ public class SessionCleanupMiddleware
         await _next(context);
     }
 }
-/*
-public class SessionCleanupMiddleware
-{
-    private readonly RequestDelegate _next;
-
-    public SessionCleanupMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
-    public async Task InvokeAsync(HttpContext context)
-    {
-        // Check if the session has expired.
-        if (!context.Session.IsAvailable)
-        {
-            // Retrieve the file paths from the session.
-            var filePaths = context.Session.GetObject<List<string>>("FilePaths");
-            if (filePaths != null)
-            {
-                // Delete the files.
-                foreach (var filePath in filePaths)
-                {
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
-                }
-            }
-        }
-
-        await _next(context);
-    }
-}
-*/

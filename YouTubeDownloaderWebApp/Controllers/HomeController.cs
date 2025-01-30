@@ -17,7 +17,7 @@ namespace YouTubeDownloaderWebApp.Controllers
         private IYoutubeDownloader _youtubeDownloader;
 
 
-        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment, IYoutubeDownloader youtubeDownloader)
+        public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
