@@ -1,24 +1,16 @@
 ﻿using FFMpegCore;
 
 namespace YouTubeDownloaderWebApp.Utility;
-public class MP3Converter
+public class Mp3Converter : IMp3Converter
 {
-    public MP3Converter(string ffmpegPath)
+    public Mp3Converter(string ffmpegPath)
     {
         GlobalFFOptions.Configure(options => options.BinaryFolder = ffmpegPath);
     }
-    public bool Convert(string source, string fileType)
+    public void Convert(string source)
     {
-        try
-        {
-            FFMpeg.ExtractAudio($"{source}.{fileType}", $"{source}.mp3");
-            File.Delete($"{source}.{fileType}");
-            return true;
-        }
-        catch
-        {
-            Console.WriteLine($"Error occured when converting file to mp3");
-        }
-        return false;
+        var fileName = Path.GetFileNameWithoutExtension(source);
+        FFMpeg.ExtractAudio(source, $"{fileName}.mp3");
+        File.Delete(source);
     }
 }

@@ -21,7 +21,7 @@ namespace YouTubeDownloaderWebApp.Controllers
         {
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
-            _youtubeDownloader = youtubeDownloader;    
+            _youtubeDownloader = new YoutubeExplodeDownloader(new Mp3Converter(General.FfmpegPath));    
         }
 
         public IActionResult Index()

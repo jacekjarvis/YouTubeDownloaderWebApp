@@ -1,25 +1,31 @@
 ﻿using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
-using YoutubeExplode.Converter; 
+using YoutubeExplode.Converter;
+using Microsoft.Extensions.Logging.Abstractions;
 
 
 namespace YouTubeDownloaderWebApp.Utility;
 
 public class YoutubeExplodeDownloader : IYoutubeDownloader
 {
-    public string VideoUrl { get; set; }
-    private string _videoTitle { get; set; }
-
     private readonly YoutubeClient _youtube;
-    private List<IStreamInfo> _streams;
+    private IMp3Converter _mp3Converter;
 
-    public YoutubeExplodeDownloader()
+    public string? VideoUrl { get; set; }
+    private string? _videoTitle { get; set; }
+    private List<IStreamInfo>? _streams;
+    
+
+    public YoutubeExplodeDownloader(IMp3Converter mp3Converter)
     {
         _youtube = new YoutubeClient();
+        _mp3Converter = mp3Converter;
     }
 
-    public string GetVideoTitle()
+    public string? GetVideoTitle()
     {
+        if (VideoUrl == null) return null;
+
         var video = _youtube.Videos.GetAsync(VideoUrl).Result;
         _videoTitle = video.Title;
         return video.Title;
@@ -75,30 +81,27 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
 
     public async Task DownloadMedia(int option, string outputPath, string title)
     {
-        var streamInfo = _streams[option];
+        if (_streams == null || _streams.Count == 0) return;
 
-        var fileType = $"{streamInfo.Container}";
-        var outputFilePath =  Path.Combine(outputPath, title);
-        var ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Utility", "ffmpeg");
+        var streamInfo = _streams[option];
+        var fileExt = $".{streamInfo.Container}";
+        var outputFilePath =  Path.Combine(outputPath, title, fileExt);
 
         if (streamInfo is AudioOnlyStreamInfo)
         {
-            await _youtube.Videos.Streams.DownloadAsync(streamInfo, $"{outputFilePath}.{fileType}");
-            var mp3Converter = new MP3Converter(ffmpegPath);
-            if (mp3Converter.Convert(outputFilePath, fileType))
-            {
-                fileType = "mp3";
-            }
-
+            await _youtube.Videos.Streams.DownloadAsync(streamInfo, outputFilePath);
+            _mp3Converter.Convert(outputFilePath);
         }
         else
         {
+            if (VideoUrl == null) return;
+
             var streamManifest = await _youtube.Videos.Streams.GetManifestAsync(VideoUrl);
             var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
             var streamInfos = new IStreamInfo[] { audioStreamInfo, streamInfo };
-            ffmpegPath = Path.Combine(ffmpegPath, "ffmpeg.exe");
-            await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder($"{outputFilePath}.{fileType}").SetFFmpegPath(ffmpegPath).Build());
+            var ffmpegPath = Path.Combine(General.FfmpegPath, "ffmpeg.exe");
+            await _youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder(outputFilePath).SetFFmpegPath(ffmpegPath).Build());
         }
     }
 
