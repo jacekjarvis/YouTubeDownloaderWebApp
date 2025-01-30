@@ -79,13 +79,13 @@ public class YoutubeExplodeDownloader : IYoutubeDownloader
     }
 
 
-    public async Task DownloadMedia(int option, string outputPath, string title)
+    public async Task DownloadMedia(int option, string outputPath, string fileName)
     {
         if (_streams == null || _streams.Count == 0) return;
 
         var streamInfo = _streams[option];
         var fileExt = streamInfo.Container.ToString();
-        var outputFilePath =  Path.Combine(outputPath, $"{title}.{fileExt}");
+        var outputFilePath =  Path.Combine(outputPath, $"{fileName}.{fileExt}");
 
         if (streamInfo is AudioOnlyStreamInfo)
         {
