@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
+using AngleSharp.Dom;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using YouTubeDownloaderWebApp.Models;
@@ -54,7 +56,7 @@ namespace YouTubeDownloaderWebApp.Controllers
         {
             if (viewModel.FileName != null)
             {
-                var path = Path.Combine(_webHostEnvironment.WebRootPath, Utility.General.TempDownloadsFolder);
+                var path = Path.Combine(_webHostEnvironment.WebRootPath, General.TempDownloadsFolder);
                 path = Path.Combine(path, viewModel.FileName);
                 var title = Utility.General.SanitizeText(viewModel.Title) + "." + Path.GetExtension(viewModel.FileName);
 
@@ -90,6 +92,17 @@ namespace YouTubeDownloaderWebApp.Controllers
                     fileName += ext;
                     viewModel.FileName = fileName;
                     TempData["YouTubeVM"] = JsonSerializer.Serialize(viewModel);
+
+                    // Store the file path in session for cleanup purposes.
+                    var filePath = Path.Combine(path, fileName);
+                    var fileData = new FileData
+                    {
+                        FilePath = filePath,
+                        Timestamp = DateTime.Now
+                    };
+                    var filePathsFromSession = HttpContext.Session.GetObject<List<FileData>>("FilePaths") ?? new List<FileData>(); // Retrieving the list from session
+                    filePathsFromSession.Add(fileData);
+                    HttpContext.Session.SetObject("FilePaths", filePathsFromSession);
 
                     return RedirectToAction("Download");
                 }
